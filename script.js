@@ -9,7 +9,7 @@
      le comportement par défaut (ouverture de mailto).
      Exemple : "https://formspree.io/f/abcdwxyz"
   --------------------------------------------------------- */
-  var FORM_ENDPOINT = "";
+  var FORM_ENDPOINT = "https://formspree.io/f/mrpbbzzk";
 
   /* ---------------------------------------------------------
      En-tête : fond au scroll
