@@ -69,6 +69,21 @@ input, textarea{ font-family: inherit; font-size: 1rem; }
 }
 .skip-link:focus{ left: 1rem; top: 1rem; }
 
+/* Barre de progression de lecture, discrète, sous le header */
+.scroll-progress{
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--terracotta);
+  z-index: 150;
+  transition: width .1s linear;
+}
+
+/* Ancrages : évite que le contenu passe sous le header fixe au clic
+   sur un lien de menu */
+section, #contenu{ scroll-margin-top: 84px; }
+
 :focus-visible{ outline: 2px solid var(--terracotta-d); outline-offset: 3px; }
 
 /* ==========================================================================
@@ -97,8 +112,22 @@ input, textarea{ font-family: inherit; font-size: 1rem; }
   color: var(--white);
 }
 .btn-ghost-light:hover{ background: rgba(255,255,255,0.14); }
+.btn-outline{
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.btn-outline:hover{ background: var(--ink); color: var(--white); }
 .btn-small{ padding: 0.6em 1.3em; font-size: 0.85rem; }
 .btn-full{ width: 100%; }
+.btn-icon-light{
+  padding: 0.7em;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.65);
+  color: var(--white);
+}
+.btn-icon-light:hover{ background: rgba(255,255,255,0.14); }
 
 .text-link{
   display: inline-block;
@@ -399,16 +428,26 @@ section{ padding: clamp(4rem, 9vw, 7.5rem) var(--gutter); }
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--sand-deep);
-  border-left: 1px solid var(--sand-deep);
+  gap: 1rem;
 }
 .stat{
-  padding: 1.8rem 1.5rem;
-  border-right: 1px solid var(--sand-deep);
-  border-bottom: 1px solid var(--sand-deep);
+  padding: 1.7rem 1.5rem;
+  background: var(--white);
+  border-radius: var(--radius-soft);
+  border: 1px solid var(--sand-deep);
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.stat:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(44,42,36,0.07);
+}
+.stat-icon{
+  display: inline-flex;
+  color: var(--olive-deep);
+  margin-bottom: 0.2rem;
 }
 .stat-value{
   font-family: var(--font-display);
@@ -448,6 +487,36 @@ section{ padding: clamp(4rem, 9vw, 7.5rem) var(--gutter); }
    GALERIE
    ========================================================================== */
 .galerie{ max-width: var(--max-width); margin: 0 auto; }
+
+.gallery-tabs{
+  display: flex;
+  justify-content: center;
+  gap: 2.2rem;
+  margin-bottom: 2.4rem;
+  border-bottom: 1px solid var(--sand-deep);
+}
+.gallery-tab{
+  background: none;
+  border: none;
+  padding: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  position: relative;
+  transition: color .25s var(--ease);
+}
+.gallery-tab::after{
+  content: '';
+  position: absolute; left: 0; right: 100%; bottom: -1px;
+  height: 2px; background: var(--terracotta-d);
+  transition: right .3s var(--ease);
+}
+.gallery-tab.is-active{ color: var(--ink); }
+.gallery-tab.is-active::after{ right: 0; }
+.gallery-tab:hover{ color: var(--ink); }
+
+.gallery-album[hidden]{ display: none; }
+
 .gallery-grid{
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -476,6 +545,24 @@ section{ padding: clamp(4rem, 9vw, 7.5rem) var(--gutter); }
   font-size: 0.85rem;
   letter-spacing: 0.03em;
   text-shadow: 0 1px 6px rgba(0,0,0,0.45);
+}
+/* Photos supplémentaires : masquées tant qu'on n'a pas cliqué sur
+   "Voir plus de photos". Ajoutez la classe gallery-item--extra à
+   chaque nouveau bloc que vous voulez cacher au départ. */
+.gallery-item--extra{
+  display: none;
+}
+.gallery-grid.is-expanded .gallery-item--extra{
+  display: block;
+  animation: gallery-fade-in .5s var(--ease);
+}
+@keyframes gallery-fade-in{
+  from{ opacity: 0; transform: translateY(8px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+.gallery-more{
+  text-align: center;
+  margin-top: 2.2rem;
 }
 @media (max-width: 900px){
   .gallery-grid{ grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
@@ -509,6 +596,141 @@ section{ padding: clamp(4rem, 9vw, 7.5rem) var(--gutter); }
 .lightbox-close{ top: 1.2rem; right: 1.5rem; }
 .lightbox-prev{ left: 1rem; top: 50%; transform: translateY(-50%); }
 .lightbox-next{ right: 1rem; top: 50%; transform: translateY(-50%); }
+.lightbox-counter{
+  position: absolute;
+  bottom: 1.3rem; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.85);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   RACCOURCIS FLOTTANTS (remonter en haut / WhatsApp)
+   ========================================================================== */
+.back-to-top{
+  position: fixed;
+  right: 1.5rem; bottom: 1.5rem;
+  z-index: 90;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity .3s var(--ease), transform .3s var(--ease), visibility .3s;
+  box-shadow: 0 6px 18px rgba(44,42,36,0.22);
+}
+.back-to-top.is-visible{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.back-to-top:hover{ background: var(--terracotta-d); }
+
+.floating-whatsapp{
+  position: fixed;
+  right: 1.5rem; bottom: 5.3rem;
+  z-index: 90;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: #25D366;
+  color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 18px rgba(37,211,102,0.35);
+  transition: transform .25s var(--ease);
+}
+.floating-whatsapp:hover{ transform: scale(1.07); }
+
+@media (max-width: 640px){
+  .back-to-top{ bottom: 5.4rem; }
+  .floating-whatsapp{ bottom: 9.2rem; }
+}
+
+/* ==========================================================================
+   BARRE DE CONTACT FIXE (mobile uniquement)
+   ========================================================================== */
+.mobile-cta-bar{
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 95;
+  background: var(--white);
+  border-top: 1px solid var(--sand-deep);
+  padding: 0.7rem 0.9rem;
+  gap: 0.7rem;
+  box-shadow: 0 -4px 16px rgba(44,42,36,0.08);
+  transform: translateY(100%);
+  transition: transform .35s var(--ease);
+}
+.mobile-cta-bar.is-visible{ transform: translateY(0); }
+.mobile-cta-btn{
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.45rem;
+  padding: 0.75em 0.6em;
+  border-radius: var(--radius-soft);
+  border: 1px solid var(--sand-deep);
+  color: var(--ink);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+.mobile-cta-btn--primary{
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--white);
+}
+@media (max-width: 640px){
+  .mobile-cta-bar{ display: flex; }
+  body{ padding-bottom: 4.6rem; } /* évite que la barre cache le footer */
+}
+
+/* ==========================================================================
+   APPARITIONS DISCRÈTES AU DÉFILEMENT
+   La classe .js-anim est ajoutée par script.js : sans JavaScript,
+   tout reste visible normalement (aucune dépendance bloquante).
+   ========================================================================== */
+.js-anim .feature-row,
+.js-anim .presentation-image,
+.js-anim .presentation-text,
+.js-anim .highlight,
+.js-anim .stat,
+.js-anim .map-frame,
+.js-anim .localisation-infos,
+.js-anim .contact-form{
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .8s var(--ease), transform .8s var(--ease);
+}
+.js-anim .feature-row.is-visible,
+.js-anim .presentation-image.is-visible,
+.js-anim .presentation-text.is-visible,
+.js-anim .highlight.is-visible,
+.js-anim .stat.is-visible,
+.js-anim .map-frame.is-visible,
+.js-anim .localisation-infos.is-visible,
+.js-anim .contact-form.is-visible{
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce){
+  .js-anim .feature-row, .js-anim .presentation-image, .js-anim .presentation-text,
+  .js-anim .highlight, .js-anim .stat, .js-anim .map-frame,
+  .js-anim .localisation-infos, .js-anim .contact-form{
+    opacity: 1; transform: none;
+  }
+}
+
+/* Champ piège à robots (anti-spam), invisible pour les visiteurs humains */
+.form-honeypot{
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px;
+  opacity: 0;
+}
 
 /* ==========================================================================
    LOCALISATION

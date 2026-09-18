@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ventevillagrimaud.github.io/VenteVillaGrimaud/sitemap.xml
